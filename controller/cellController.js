@@ -1,4 +1,5 @@
 import Cell from '../models/cell.js';
+import getNextCellsManyN from '../models/cell.js';
 import bcrypt from 'bcrypt';
 
 export async function getCells(req, res) {
@@ -25,6 +26,28 @@ export async function postCell(req, res) {
     res.status(400).json({ msg: error.message });
   }
 }
+
+export async function createMultipleCells(req, res) {
+  try {
+    const { numCells } = req.body;
+    const createdCells = [];
+
+    for (let i = 0; i < numCells; i++) {
+      const numberCell = await Cell.getNextCellNumber();
+      const cell = new Cell({ numberCell });
+      await cell.save();
+      createdCells.push(cell);
+    }
+
+    res.status(201).json({ 
+      msg: `${numCells} cells created successfully`, 
+      cells: createdCells 
+    });
+  } catch (error) {
+    res.status(400).json({ msg: error.message });
+  }
+}
+
 
 export async function getCellById(req, res) {
   try {
